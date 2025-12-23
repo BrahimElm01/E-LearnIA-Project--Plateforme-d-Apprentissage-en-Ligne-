@@ -471,14 +471,13 @@ Voir `elearnia-backend/diagrammes/README_PLANTUML.md` pour plus de détails.
 
 ## 📸 Screenshots
 
-<img width="1770" height="1098" alt="Sequence_Progression" src="https://github.com/user-attachments/assets/d89dd186-4fad-4eba-847a-e4116465e0c4" />
-<img width="1415" height="834" alt="Sequence_Creation_Cours" src="https://github.com/user-attachments/assets/49210873-09b8-4cbe-b682-f384e90be156" />
-<img width="899" height="963" alt="Sequence_Authentification" src="https://github.com/user-attachments/assets/e34a9d9d-8394-465d-bbaf-e5eb386de8b1" />
-<img width="626" height="1343" alt="use case prof " src="https://github.com/user-attachments/assets/dcfbcf23-776f-4d5b-abc8-0cab9ea7448b" />
-<img width="642" height="869" alt="use case " src="https://github.com/user-attachments/assets/d2f4cd93-5dc1-4798-b148-7eebb9b5f281" />
-<img width="2177" height="807" alt="class2" src="https://github.com/user-attachments/assets/4375dfc8-11a1-4914-8c2e-00645cc4b05e" />
-<img width="993" height="1116" alt="class1" src="https://github.com/user-attachments/assets/27fb26e4-75ca-46cc-9a9f-f5e8ca7ced75" />
-
+<img width="993" height="1116" alt="class1" src="https://github.com/user-attachments/assets/afb8396d-f09b-47a0-90ec-4f0df66bd2c6" />
+<img width="2177" height="807" alt="class2" src="https://github.com/user-attachments/assets/66515587-2cd9-4c57-8b87-8e693e04da4a" />
+<img width="642" height="869" alt="use case " src="https://github.com/user-attachments/assets/f068df5d-75c9-4974-9ba8-288e27a7d9df" />
+<img width="626" height="1343" alt="use case prof " src="https://github.com/user-attachments/assets/5a52f602-5ab0-4623-a3d1-80a9cc1d549f" />
+<img width="899" height="963" alt="Sequence_Authentification" src="https://github.com/user-attachments/assets/57109f64-ac2e-4696-b259-fb53d0396631" />
+<img width="1415" height="834" alt="Sequence_Creation_Cours" src="https://github.com/user-attachments/assets/0dc79bce-7ac2-422f-8bb5-9d3c658dc433" />
+<img width="1770" height="1098" alt="Sequence_Progression" src="https://github.com/user-attachments/assets/03561e01-6af4-4cc2-9695-299a15743b90" />
 
 ---
 
