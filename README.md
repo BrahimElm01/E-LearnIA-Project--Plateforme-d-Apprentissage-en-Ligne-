@@ -471,7 +471,14 @@ Voir `elearnia-backend/diagrammes/README_PLANTUML.md` pour plus de détails.
 
 ## 📸 Screenshots
 
-> _Les screenshots seront ajoutés ici_
+<img width="1770" height="1098" alt="Sequence_Progression" src="https://github.com/user-attachments/assets/d89dd186-4fad-4eba-847a-e4116465e0c4" />
+<img width="1415" height="834" alt="Sequence_Creation_Cours" src="https://github.com/user-attachments/assets/49210873-09b8-4cbe-b682-f384e90be156" />
+<img width="899" height="963" alt="Sequence_Authentification" src="https://github.com/user-attachments/assets/e34a9d9d-8394-465d-bbaf-e5eb386de8b1" />
+<img width="626" height="1343" alt="use case prof " src="https://github.com/user-attachments/assets/dcfbcf23-776f-4d5b-abc8-0cab9ea7448b" />
+<img width="642" height="869" alt="use case " src="https://github.com/user-attachments/assets/d2f4cd93-5dc1-4798-b148-7eebb9b5f281" />
+<img width="2177" height="807" alt="class2" src="https://github.com/user-attachments/assets/4375dfc8-11a1-4914-8c2e-00645cc4b05e" />
+<img width="993" height="1116" alt="class1" src="https://github.com/user-attachments/assets/27fb26e4-75ca-46cc-9a9f-f5e8ca7ced75" />
+
 
 ---
 
@@ -492,36 +499,6 @@ Les contributions sont les bienvenues ! Pour contribuer :
 - Mettre à jour la documentation si nécessaire
 - Respecter les standards de commit (Conventional Commits)
 
----
-
-## 📝 Licence
-
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
-
----
-
-## 👥 Auteurs
-
-- **Votre Nom** - *Développement initial* - [VotreGitHub](https://github.com/votre-username)
-
----
-
-## 🙏 Remerciements
-
-- Spring Boot Community
-- Flutter Team
-- Angular Team
-- Tous les contributeurs open source
-
----
-
-## 📞 Contact
-
-Pour toute question ou suggestion :
-
-- 📧 Email : votre.email@example.com
-- 🐛 Issues : [GitHub Issues](https://github.com/votre-username/elearnia/issues)
-- 💬 Discussions : [GitHub Discussions](https://github.com/votre-username/elearnia/discussions)
 
 ---
 
