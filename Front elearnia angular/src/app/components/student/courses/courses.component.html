@@ -1,0 +1,126 @@
+<div class="courses-container">
+  <div class="header">
+    <div class="header-top">
+      <button class="back-btn" (click)="navigateBack()" title="Retour à l'accueil">
+        ← Retour
+      </button>
+    </div>
+    <h1>{{ category() ? 'Cours: ' + category() : 'Mes cours' }}</h1>
+    <p class="subtitle">Gérez et suivez vos cours</p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Chargement de vos cours...</div>
+  } @else if (courses().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📚</div>
+      <h2>Aucun cours disponible</h2>
+      <p>Vous n'êtes inscrit à aucun cours pour le moment.</p>
+      <button class="btn-primary" (click)="navigateToHome()">Voir tous les cours</button>
+    </div>
+  } @else {
+    <!-- Stats et Filtres -->
+    <div class="filters-section">
+      <div class="stats-cards">
+        <div class="stat-mini-card">
+          <span class="stat-number">{{ courses().length }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-mini-card">
+          <span class="stat-number">{{ getCompletedCount() }}</span>
+          <span class="stat-label">Complétés</span>
+        </div>
+        <div class="stat-mini-card">
+          <span class="stat-number">{{ getInProgressCount() }}</span>
+          <span class="stat-label">En cours</span>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div class="search-box">
+          <input 
+            type="text" 
+            placeholder="Rechercher un cours..." 
+            [value]="searchQuery()"
+            (input)="searchQuery.set($any($event.target).value); onSearchChange()"
+            class="search-input"
+          />
+          <span class="search-icon">🔍</span>
+        </div>
+
+        <div class="filter-buttons">
+          <button 
+            class="filter-btn" 
+            [class.active]="filterType() === 'all'"
+            (click)="onFilterChange('all')">
+            Tous
+          </button>
+          <button 
+            class="filter-btn" 
+            [class.active]="filterType() === 'in-progress'"
+            (click)="onFilterChange('in-progress')">
+            En cours
+          </button>
+          <button 
+            class="filter-btn" 
+            [class.active]="filterType() === 'completed'"
+            (click)="onFilterChange('completed')">
+            Complétés
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des cours -->
+    @if (filteredCourses().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h2>Aucun cours trouvé</h2>
+        <p>Aucun cours ne correspond à vos critères de recherche.</p>
+      </div>
+    } @else {
+      <div class="courses-grid">
+        @for (course of filteredCourses(); track course.id) {
+          <div class="course-card" (click)="navigateToCourse(course.id)">
+            <div class="course-image">
+              @if (course.imageUrl) {
+                <img [src]="course.imageUrl" [alt]="course.title" />
+              } @else {
+                <div class="course-image-placeholder">📚</div>
+              }
+              @if (getLimitedProgress(course.progress) >= 100) {
+                <div class="completed-badge">✅ Complété</div>
+              }
+            </div>
+            <div class="course-content">
+              <h3>{{ course.title }}</h3>
+              <p class="teacher">Par {{ course.teacherName }}</p>
+              <div class="progress-section">
+                <div class="progress-bar">
+                  <div 
+                    class="progress-fill" 
+                    [style.width.%]="getLimitedProgress(course.progress)"
+                    [class.completed]="getLimitedProgress(course.progress) >= 100">
+                  </div>
+                </div>
+                <p class="progress-text">{{ formatProgress(course.progress) }}% Complété</p>
+              </div>
+              <div class="course-footer">
+                @if (getLimitedProgress(course.progress) >= 100) {
+                  <span class="status-badge completed">✅ Terminé</span>
+                } @else if (course.progress > 0) {
+                  <span class="status-badge in-progress">🔄 En cours</span>
+                } @else {
+                  <span class="status-badge not-started">📖 Non commencé</span>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>
+
+
+

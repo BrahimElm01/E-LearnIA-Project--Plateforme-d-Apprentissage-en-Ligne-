@@ -1,0 +1,105 @@
+<div class="quizzes-container">
+  <div class="header">
+    <div class="header-top">
+      <button class="back-btn" (click)="navigateBack()" title="Retour à l'accueil">
+        ← Retour
+      </button>
+    </div>
+    <h1>Quizzes disponibles</h1>
+    <p class="subtitle">Testez vos connaissances</p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Chargement des quizzes...</div>
+  } @else if (quizzes().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📝</div>
+      <h2>Aucun quiz disponible</h2>
+      <p>Il n'y a pas de quiz disponible pour le moment.</p>
+    </div>
+  } @else {
+    <!-- Filtres -->
+    <div class="filters-section">
+      <div class="filters">
+        <div class="search-box">
+          <input 
+            type="text" 
+            placeholder="Rechercher un quiz..." 
+            [value]="searchQuery()"
+            (input)="searchQuery.set($any($event.target).value); onSearchChange()"
+            class="search-input"
+          />
+          <span class="search-icon">🔍</span>
+        </div>
+
+        <div class="level-filter">
+          <label>Filtrer par niveau :</label>
+          <select [value]="selectedLevel()" (change)="onLevelChange($any($event.target).value)" class="level-select">
+            <option value="ALL">Tous les niveaux</option>
+            <option value="BEGINNER">Débutant</option>
+            <option value="INTERMEDIATE">Intermédiaire</option>
+            <option value="ADVANCED">Avancé</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des quizzes -->
+    @if (filteredQuizzes().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h2>Aucun quiz trouvé</h2>
+        <p>Aucun quiz ne correspond à vos critères de recherche.</p>
+      </div>
+    } @else {
+      <div class="quizzes-grid">
+        @for (quiz of filteredQuizzes(); track quiz.id) {
+          <div class="quiz-card" [class.disabled]="!canTakeQuiz(quiz.remainingAttempts)" (click)="canTakeQuiz(quiz.remainingAttempts) && navigateToQuiz(quiz.id)">
+            <div class="quiz-header">
+              <h3>{{ quiz.title }}</h3>
+              <span class="level-badge" [style.background-color]="getLevelColor(quiz.level)">
+                {{ getLevelLabel(quiz.level) }}
+              </span>
+            </div>
+            
+            @if (quiz.description) {
+              <p class="description">{{ quiz.description }}</p>
+            }
+
+            <div class="quiz-stats">
+              <div class="stat-item">
+                <span class="stat-icon">❓</span>
+                <span class="stat-text">{{ quiz.questionCount }} questions</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">🎯</span>
+                <span class="stat-text">Score min: {{ quiz.passingScore }}%</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">🔄</span>
+                <span class="stat-text">{{ quiz.maxAttempts }} tentatives max</span>
+              </div>
+            </div>
+
+            <div class="quiz-footer">
+              @if (canTakeQuiz(quiz.remainingAttempts)) {
+                <div class="attempts-info available">
+                  <span class="attempts-text">🟢 {{ quiz.remainingAttempts }} tentative(s) restante(s)</span>
+                </div>
+                <button class="quiz-btn">Commencer le quiz</button>
+              } @else {
+                <div class="attempts-info exhausted">
+                  <span class="attempts-text">🔴 Toutes les tentatives utilisées</span>
+                </div>
+                <button class="quiz-btn disabled" disabled>Indisponible</button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>
+
+
+

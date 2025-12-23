@@ -1,0 +1,220 @@
+<div class="course-detail-container">
+  @if (isLoading()) {
+    <div class="loading">
+      <div class="spinner">⏳</div>
+      <p>Chargement du cours...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="error-container">
+      <div class="error-icon">⚠️</div>
+      <h2>Erreur</h2>
+      <p>{{ errorMessage() }}</p>
+      <button class="btn-primary" (click)="navigateBack()">Retour aux cours</button>
+    </div>
+  } @else if (course()) {
+    <div class="header-top">
+      <button class="back-btn" (click)="navigateBack()" title="Retour aux cours">
+        ← Retour
+      </button>
+    </div>
+    <div class="course-header">
+      @if (course()!.imageUrl) {
+        <img [src]="course()!.imageUrl" [alt]="course()!.title" class="course-image" />
+      } @else {
+        <div class="course-image-placeholder">📚</div>
+      }
+      <div class="course-info">
+        <h1>{{ course()!.title }}</h1>
+        <p class="teacher">Par {{ course()!.teacher ? course()!.teacher.fullName : 'Professeur' }}</p>
+        <p class="description">{{ course()!.description }}</p>
+        @if (isEnrolled()) {
+          <div class="enrollment-status">
+            <span class="enrolled-badge">✅ Vous êtes inscrit à ce cours</span>
+            <button class="btn-read-course" (click)="navigateToCourseReader()">
+              <span class="book-icon">📖</span>
+              Lire le cours
+            </button>
+          </div>
+        } @else if (isEnrolling()) {
+          <div class="enrollment-status">
+            <span class="enrolling-badge">⏳ Inscription en cours...</span>
+          </div>
+        } @else {
+          <button 
+            class="enroll-btn" 
+            (click)="enrollToCourse()" 
+            [disabled]="isEnrolling()">
+            S'inscrire au cours
+          </button>
+        }
+        @if (enrollmentMessage()) {
+          <p class="enrollment-message" [class.error]="enrollmentMessage()?.includes('Erreur')">
+            {{ enrollmentMessage() }}
+          </p>
+        }
+      </div>
+    </div>
+
+    <div class="lessons-section">
+      <h2>Leçons ({{ lessons().length }})</h2>
+      @if (lessons().length === 0) {
+        <div class="empty-lessons">
+          <p>Aucune leçon disponible pour ce cours.</p>
+        </div>
+      } @else {
+        <div class="lessons-list">
+          @for (lesson of lessons(); track lesson.id) {
+            <div 
+              class="lesson-item" 
+              [class.completed]="isLessonCompleted(lesson.id)"
+              [class.disabled]="!isEnrolled()">
+              <div class="lesson-number" [class.completed]="isLessonCompleted(lesson.id)">
+                @if (isLessonCompleted(lesson.id)) {
+                  <span class="checkmark">✓</span>
+                } @else {
+                  {{ lesson.orderIndex + 1 }}
+                }
+              </div>
+              <div class="lesson-content" (click)="isEnrolled() && navigateToLesson(lesson.id)">
+                <h3>{{ lesson.title }}</h3>
+                @if (lesson.description) {
+                  <p class="lesson-description-preview">{{ getDescriptionPreview(lesson.description) }}</p>
+                }
+                <div class="lesson-meta">
+                  @if (lesson.duration) {
+                    <span class="lesson-duration">⏱️ {{ lesson.duration }} min</span>
+                  }
+                  @if (isLessonCompleted(lesson.id)) {
+                    <span class="completed-badge">✓ Terminée</span>
+                  }
+                </div>
+                @if (!isEnrolled()) {
+                  <span class="enrollment-required">🔒 Inscription requise</span>
+                }
+              </div>
+              <div class="lesson-actions">
+                @if (isEnrolled()) {
+                  @if (!isLessonCompleted(lesson.id)) {
+                    <button 
+                      class="btn-mark-complete"
+                      (click)="markLessonAsComplete(lesson.id, $event)"
+                      [disabled]="isMarkingComplete().get(lesson.id)">
+                      @if (isMarkingComplete().get(lesson.id)) {
+                        ⏳
+                      } @else {
+                        ✓ Marquer terminé
+                      }
+                    </button>
+                  } @else {
+                    <span class="completed-icon">✓</span>
+                  }
+                  @if (hasLessonQuiz(lesson.id)) {
+                    <button 
+                      class="btn-quiz"
+                      (click)="navigateToLessonQuiz(lesson.id, $event)">
+                      ❓ Quiz
+                    </button>
+                  }
+                }
+                <div class="lesson-arrow" [class.disabled]="!isEnrolled()" (click)="isEnrolled() && navigateToLesson(lesson.id)">→</div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Section des avis -->
+    <div class="reviews-section">
+      <div class="reviews-header">
+        <h2>Avis des étudiants ({{ reviews().length }})</h2>
+        @if (isEnrolled()) {
+          <button class="btn-add-review" (click)="toggleReviewForm()">
+            {{ showReviewForm() ? 'Annuler' : '➕ Ajouter un avis' }}
+          </button>
+        }
+      </div>
+
+      @if (showReviewForm()) {
+        <div class="review-form-card">
+          <h3>Votre avis</h3>
+          <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+            <div class="form-group">
+              <label>Note (1-5 étoiles) *</label>
+              <select formControlName="rating" class="rating-select">
+                <option [value]="5">⭐⭐⭐⭐⭐ (5)</option>
+                <option [value]="4">⭐⭐⭐⭐ (4)</option>
+                <option [value]="3">⭐⭐⭐ (3)</option>
+                <option [value]="2">⭐⭐ (2)</option>
+                <option [value]="1">⭐ (1)</option>
+              </select>
+              @if (reviewForm.get('rating')?.invalid && reviewForm.get('rating')?.touched) {
+                <span class="error">Note requise</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label>Commentaire *</label>
+              <textarea 
+                formControlName="comment" 
+                rows="4" 
+                placeholder="Partagez votre expérience avec ce cours...">
+              </textarea>
+              @if (reviewForm.get('comment')?.invalid && reviewForm.get('comment')?.touched) {
+                <span class="error">Commentaire requis (min. 10 caractères)</span>
+              }
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="toggleReviewForm()">Annuler</button>
+              <button type="submit" class="btn-primary" [disabled]="reviewForm.invalid || isSubmittingReview()">
+                @if (isSubmittingReview()) {
+                  Envoi...
+                } @else {
+                  Publier l'avis
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      @if (reviews().length === 0) {
+        <div class="empty-reviews">
+          <p>Aucun avis pour le moment. Soyez le premier à laisser un avis !</p>
+        </div>
+      } @else {
+        <div class="reviews-list">
+          @for (review of reviews(); track review.id) {
+            <div class="review-card">
+              <div class="review-header">
+                <div class="review-author">
+                  <strong>{{ review.studentName || 'Étudiant' }}</strong>
+                </div>
+                <div class="review-rating">
+                  {{ getStars(review.rating) }} ({{ review.rating }}/5)
+                </div>
+              </div>
+              @if (review.comment) {
+                <p class="review-comment">{{ review.comment }}</p>
+              }
+              @if (review.createdAt) {
+                <span class="review-date">{{ review.createdAt | date:'dd/MM/yyyy' }}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="error-container">
+      <div class="error-icon">❌</div>
+      <h2>Cours non trouvé</h2>
+      <p>Le cours demandé n'existe pas ou n'est plus disponible.</p>
+      <button class="btn-primary" (click)="navigateBack()">Retour aux cours</button>
+    </div>
+  }
+</div>
+
+
+

@@ -1,0 +1,165 @@
+<div class="profile-container">
+  <div class="profile-header-top">
+    <button class="back-btn" (click)="navigateBack()" title="Retour à l'accueil">
+      ← Retour
+    </button>
+  </div>
+  <div class="profile-card">
+    <!-- Header avec avatar -->
+    <div class="profile-header">
+      <div class="avatar-container">
+        <div class="avatar">
+          {{ (user()?.fullName && user()!.fullName.length > 0) ? user()!.fullName.charAt(0).toUpperCase() : 'U' }}
+        </div>
+        <div class="avatar-badge">
+          <span class="badge-icon">✓</span>
+        </div>
+      </div>
+      <div class="profile-header-info">
+        <h1>{{ user()?.fullName || 'Utilisateur' }}</h1>
+        <p class="profile-role">{{ getRoleDisplayName(user()?.role || '') }}</p>
+      </div>
+      @if (!isEditing()) {
+        <button class="edit-btn" (click)="startEditing()" title="Modifier le profil">
+          <span class="edit-icon">✏️</span>
+          <span class="edit-text">Modifier</span>
+        </button>
+      }
+    </div>
+
+    @if (user()) {
+      <!-- Messages de succès/erreur -->
+      @if (successMessage()) {
+        <div class="alert alert-success">
+          <span class="alert-icon">✓</span>
+          <span>{{ successMessage() }}</span>
+        </div>
+      }
+      
+      @if (errorMessage()) {
+        <div class="alert alert-error">
+          <span class="alert-icon">⚠️</span>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <!-- Formulaire d'édition ou affichage -->
+      @if (isEditing()) {
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+          <div class="form-group">
+            <label for="fullName">Nom complet *</label>
+            <input
+              id="fullName"
+              type="text"
+              formControlName="fullName"
+              placeholder="Votre nom complet"
+              [class.error]="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched"
+            />
+            @if (profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched) {
+              <span class="error-text">Le nom doit contenir au moins 3 caractères</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="votre@email.com"
+              [class.error]="profileForm.get('email')?.invalid && profileForm.get('email')?.touched"
+            />
+            @if (profileForm.get('email')?.invalid && profileForm.get('email')?.touched) {
+              <span class="error-text">Email invalide</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="biography">Biographie (optionnel)</label>
+            <textarea
+              id="biography"
+              formControlName="biography"
+              rows="4"
+              placeholder="Parlez-nous de vous..."
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Rôle</label>
+            <div class="role-display">
+              <span class="role-badge">{{ getRoleDisplayName(user()!.role) }}</span>
+              <span class="role-note">Le rôle ne peut pas être modifié</span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="cancel-btn" (click)="cancelEditing()" [disabled]="isSaving()">
+              Annuler
+            </button>
+            <button type="submit" class="save-btn" [disabled]="profileForm.invalid || isSaving()">
+              @if (isSaving()) {
+                <span class="spinner"></span>
+                <span>Enregistrement...</span>
+              } @else {
+                <span>Enregistrer</span>
+              }
+            </button>
+          </div>
+        </form>
+      } @else {
+        <!-- Affichage en lecture seule -->
+        <div class="profile-info">
+          <div class="info-item">
+            <div class="info-label">
+              <span class="info-icon">👤</span>
+              <label>Nom complet</label>
+            </div>
+            <p class="info-value">{{ user()!.fullName }}</p>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">
+              <span class="info-icon">📧</span>
+              <label>Email</label>
+            </div>
+            <p class="info-value">{{ user()!.email }}</p>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">
+              <span class="info-icon">🎯</span>
+              <label>Rôle</label>
+            </div>
+            <div class="role-badge-display">
+              <span class="role-badge">{{ getRoleDisplayName(user()!.role) }}</span>
+            </div>
+          </div>
+
+          @if (user()!.biography) {
+            <div class="info-item">
+              <div class="info-label">
+                <span class="info-icon">📝</span>
+                <label>Biographie</label>
+              </div>
+              <p class="info-value biography-text">{{ user()!.biography }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="profile-actions">
+          <button class="logout-btn" (click)="logout()">
+            <span class="logout-icon">🚪</span>
+            <span>Déconnexion</span>
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+
+
+
+
+
+

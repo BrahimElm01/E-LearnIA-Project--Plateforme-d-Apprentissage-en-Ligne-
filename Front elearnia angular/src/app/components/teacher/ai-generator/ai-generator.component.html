@@ -1,0 +1,81 @@
+<div class="ai-generator-container">
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-bar-content">
+      <div>
+        <h1>Enseigner avec IA</h1>
+        <p>Génère automatiquement un cours complet avec IA</p>
+      </div>
+      <div class="app-bar-actions">
+        <button class="icon-btn" (click)="navigateToHome()" title="Accueil">
+          <span class="icon">🏠</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="form-section">
+      <h2>Générer un cours avec IA</h2>
+    <form [formGroup]="form" (ngSubmit)="generateCourse()">
+      <div class="form-group">
+        <label for="idea">Idée du cours</label>
+        <textarea id="idea" formControlName="idea" rows="4" placeholder="Ex: Introduction à Flutter pour débutants"></textarea>
+        @if (form.get('idea')?.invalid && form.get('idea')?.touched) {
+          <span class="error">Idée requise (min. 5 caractères)</span>
+        }
+      </div>
+      <div class="form-group">
+        <label for="level">Niveau</label>
+        <select id="level" formControlName="level">
+          <option value="BEGINNER">Débutant</option>
+          <option value="INTERMEDIATE">Intermédiaire</option>
+          <option value="ADVANCED">Avancé</option>
+        </select>
+      </div>
+      <button type="submit" class="generate-btn" [disabled]="form.invalid || isGenerating()">
+        @if (isGenerating()) {
+          Génération...
+        } @else {
+          Générer le cours
+        }
+      </button>
+    </form>
+  </div>
+
+  @if (generatedCourse()) {
+    <div class="preview-section">
+      <h2>Aperçu du cours généré</h2>
+      <div class="course-preview">
+        <h3>{{ generatedCourse()!.title }}</h3>
+        <p>{{ generatedCourse()!.description }}</p>
+        <div class="objectives">
+          <h4>Objectifs :</h4>
+          <ul>
+            @for (objective of generatedCourse()!.objectives; track objective) {
+              <li>{{ objective }}</li>
+            }
+          </ul>
+        </div>
+        <div class="lessons">
+          <h4>Leçons ({{ generatedCourse()!.lessons.length }})</h4>
+          <ul>
+            @for (lesson of generatedCourse()!.lessons; track lesson.orderIndex) {
+              <li>{{ lesson.title }}</li>
+            }
+          </ul>
+        </div>
+        <button class="create-btn" (click)="createCourse()" [disabled]="isCreating()">
+          @if (isCreating()) {
+            Création...
+          } @else {
+            Créer le cours
+          }
+        </button>
+      </div>
+    </div>
+  }
+  </div>
+</div>
+
+

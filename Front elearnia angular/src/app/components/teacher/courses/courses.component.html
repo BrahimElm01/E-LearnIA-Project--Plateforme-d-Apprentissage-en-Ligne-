@@ -1,0 +1,61 @@
+<div class="courses-container">
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-bar-content">
+      <div>
+        <h1>Mes cours</h1>
+        <p>Gérer tous vos cours</p>
+      </div>
+      <div class="app-bar-actions">
+        <button class="icon-btn" (click)="navigateToHome()" title="Accueil">
+          <span class="icon">🏠</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="header">
+      <h1>Mes cours</h1>
+      <button class="create-btn" (click)="navigateToCreate()">
+        <span>➕</span> Créer un cours
+      </button>
+    </div>
+
+  @if (isLoading()) {
+    <div class="loading">Chargement...</div>
+  } @else if (!isLoading() && courses().length === 0) {
+    <div class="empty-state">
+      <p>Aucun cours créé</p>
+      <button class="create-btn" (click)="navigateToCreate()">Créer votre premier cours</button>
+    </div>
+  } @else {
+    <div class="courses-grid">
+      @for (course of courses(); track course.id) {
+        <div class="course-card">
+          @if (course.imageUrl) {
+            <img [src]="course.imageUrl" [alt]="course.title" class="course-image" />
+          } @else {
+            <div class="course-image-placeholder">📚</div>
+          }
+          <div class="course-content">
+            <h3>{{ course.title }}</h3>
+            <p>{{ course.description }}</p>
+            <div class="course-status">
+              <span [class.published]="course.published" [class.draft]="!course.published">
+                {{ course.published ? 'Publié' : 'Brouillon' }}
+              </span>
+            </div>
+            <div class="course-actions">
+              <button class="edit-btn" (click)="navigateToEdit(course.id)">Modifier</button>
+              <button class="delete-btn" (click)="deleteCourse(course.id)">Supprimer</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+  </div>
+</div>
+
+

@@ -1,0 +1,139 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <h1>Créer un compte</h1>
+      <p>Rejoignez E-LearnIA</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <!-- Sélection du rôle -->
+      <div class="role-selector">
+        <button
+          type="button"
+          class="role-btn"
+          [class.active]="selectedRole() === 'LEARNER'"
+          (click)="selectedRole.set('LEARNER')"
+        >
+          Étudiant
+        </button>
+        <button
+          type="button"
+          class="role-btn"
+          [class.active]="selectedRole() === 'TEACHER'"
+          (click)="selectedRole.set('TEACHER')"
+        >
+          Professeur
+        </button>
+      </div>
+
+      <!-- Full Name -->
+      <div class="form-group">
+        <label for="fullName">Nom complet</label>
+        <input
+          id="fullName"
+          type="text"
+          formControlName="fullName"
+          placeholder="Votre nom complet"
+          [class.error]="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched"
+        />
+        @if (registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched) {
+          <span class="error-text">Nom requis (min. 3 caractères)</span>
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="votre@email.com"
+          [class.error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+        />
+        @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+          <span class="error-text">Email invalide</span>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          [class.error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+        />
+        @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+          <span class="error-text">Mot de passe requis (min. 6 caractères)</span>
+        }
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label for="confirmPassword">Confirmer le mot de passe</label>
+        <input
+          id="confirmPassword"
+          type="password"
+          formControlName="confirmPassword"
+          placeholder="••••••••"
+          [class.error]="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched"
+        />
+        @if (registerForm.get('confirmPassword')?.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched) {
+          <span class="error-text">Les mots de passe ne correspondent pas</span>
+        }
+      </div>
+
+      <!-- Error message -->
+      @if (errorMessage()) {
+        <div class="error-message">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- Submit button -->
+      <button
+        type="submit"
+        class="submit-btn"
+        [disabled]="registerForm.invalid || isLoading()"
+      >
+        @if (isLoading()) {
+          <span>Inscription...</span>
+        } @else {
+          <span>S'inscrire</span>
+        }
+      </button>
+    </form>
+
+    <div class="login-link">
+      <p>Déjà un compte ? <a (click)="navigateToLogin()">Se connecter</a></p>
+    </div>
+  </div>
+
+  <!-- Popup de succès -->
+  @if (showSuccessPopup()) {
+    <div class="success-popup-overlay" (click)="closeSuccessPopup()">
+      <div class="success-popup" (click)="$event.stopPropagation()">
+        <div class="success-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" fill="#10b981" opacity="0.2"/>
+            <path d="M9 12l2 2 4-4" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/>
+          </svg>
+        </div>
+        <h2>Inscription réussie !</h2>
+        <p>Votre compte a été créé avec succès. Vous allez être redirigé vers la page de connexion.</p>
+        <button class="popup-close-btn" (click)="closeSuccessPopup()">Continuer</button>
+      </div>
+    </div>
+  }
+</div>
+
+
+
+
+
+
+

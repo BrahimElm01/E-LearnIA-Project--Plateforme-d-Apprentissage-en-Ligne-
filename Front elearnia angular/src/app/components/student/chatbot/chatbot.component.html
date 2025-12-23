@@ -1,0 +1,78 @@
+<!-- Bouton flottant pour ouvrir le chat -->
+<button class="chatbot-toggle-btn" (click)="toggleChat()" [class.open]="isOpen()">
+  @if (isOpen()) {
+    <span class="close-icon">✕</span>
+  } @else {
+    <span class="chat-icon">💬</span>
+    <span class="pulse-ring"></span>
+  }
+</button>
+
+<!-- Widget de chat flottant -->
+@if (isOpen()) {
+  <div class="chatbot-widget">
+    <div class="chat-header">
+      <div class="header-content">
+        <div class="ai-avatar">🤖</div>
+        <div class="header-text">
+          <h3>Assistant IA</h3>
+          <p class="status">En ligne</p>
+        </div>
+      </div>
+      <button class="close-btn" (click)="closeChat()" title="Fermer">✕</button>
+    </div>
+    
+    <div class="messages-container" #messagesContainer>
+      @for (message of messages(); track message.id) {
+        <div class="message" [class.user]="message.isUser">
+          @if (!message.isUser) {
+            <div class="ai-avatar-small">🤖</div>
+          }
+          <div class="message-bubble" [class.user]="message.isUser">
+            <p>{{ message.text }}</p>
+            <span class="timestamp">{{ message.timestamp | date:'HH:mm' }}</span>
+          </div>
+        </div>
+      }
+      @if (isLoading()) {
+        <div class="message">
+          <div class="ai-avatar-small">🤖</div>
+          <div class="message-bubble loading">
+            <div class="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+    
+    <div class="input-container">
+      <input
+        type="text"
+        [value]="currentMessage()"
+        (input)="currentMessage.set($any($event.target).value)"
+        (keyup.enter)="sendMessage()"
+        placeholder="Tapez votre message..."
+        [disabled]="isLoading()"
+        class="message-input"
+      />
+      <button 
+        class="send-btn" 
+        (click)="sendMessage()" 
+        [disabled]="isLoading() || !currentMessage().trim()"
+        title="Envoyer">
+        <span>➤</span>
+      </button>
+    </div>
+  </div>
+}
+
+
+
+
+
+
+
+

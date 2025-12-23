@@ -1,0 +1,66 @@
+<div class="teacher-home-container">
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-bar-content">
+      <div>
+        <h1>Bonjour, {{ user?.fullName }}</h1>
+        <p>Tableau de bord professeur</p>
+      </div>
+      <div class="app-bar-actions">
+        <button class="icon-btn" (click)="navigateToProfile()" title="Profil">
+          <span class="icon">👤</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <h2 class="section-title">Actions rapides</h2>
+    
+    <div class="dashboard-grid">
+      <div class="dashboard-card" (click)="navigateToAIGenerator()">
+        <div class="card-icon">🤖</div>
+        <h3>Enseigner avec IA</h3>
+        <p>Génère automatiquement un cours complet avec IA</p>
+      </div>
+
+      <div class="dashboard-card" (click)="navigateToCreateCourse()">
+        <div class="card-icon">➕</div>
+        <h3>Créer un cours</h3>
+        <p>Ajoute un nouveau cours pour tes élèves</p>
+      </div>
+
+      <div class="dashboard-card" (click)="navigateToCourses()">
+        <div class="card-icon">📚</div>
+        <h3>Mes cours</h3>
+        <p>Voir et gérer tous tes cours</p>
+      </div>
+
+      <div class="dashboard-card" (click)="navigateToAnalytics()">
+        <div class="card-icon">📊</div>
+        <h3>Analyses</h3>
+        <p>Statistiques et performances des cours</p>
+      </div>
+
+      <div class="dashboard-card" (click)="navigateToProgress()">
+        <div class="card-icon">👥</div>
+        <h3>Suivi des élèves</h3>
+        <p>Progression des étudiants inscrits</p>
+      </div>
+
+      <div class="dashboard-card" (click)="navigateToGenerateQuiz()">
+        <div class="card-icon">🎯</div>
+        <h3>Générer quiz par IA</h3>
+        <p>Créer un quiz automatiquement avec l'IA</p>
+      </div>
+
+      <div class="dashboard-card" (click)="navigateToQuizzes()">
+        <div class="card-icon">📝</div>
+        <h3>Mes quizzes</h3>
+        <p>Voir et gérer tous vos quizzes générés</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+

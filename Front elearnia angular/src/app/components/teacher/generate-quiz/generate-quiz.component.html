@@ -1,0 +1,77 @@
+<div class="generate-quiz-container">
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-bar-content">
+      <div>
+        <h1>Générer quiz par IA</h1>
+        <p>Créer un quiz automatiquement avec l'IA</p>
+      </div>
+      <div class="app-bar-actions">
+        <button class="icon-btn" (click)="navigateToHome()" title="Accueil">
+          <span class="icon">🏠</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="form-section">
+      <h2>Générer un quiz avec IA</h2>
+    <form [formGroup]="form" (ngSubmit)="generateQuiz()">
+      <div class="form-group">
+        <label for="topic">Sujet du quiz</label>
+        <input id="topic" type="text" formControlName="topic" placeholder="Ex: Flutter Basics" />
+        @if (form.get('topic')?.invalid && form.get('topic')?.touched) {
+          <span class="error">Sujet requis (min. 3 caractères)</span>
+        }
+      </div>
+      <div class="form-group">
+        <label for="difficulty">Difficulté</label>
+        <select id="difficulty" formControlName="difficulty">
+          <option value="BEGINNER">Débutant</option>
+          <option value="INTERMEDIATE">Intermédiaire</option>
+          <option value="ADVANCED">Avancé</option>
+        </select>
+      </div>
+      <button type="submit" class="generate-btn" [disabled]="form.invalid || isGenerating()">
+        @if (isGenerating()) {
+          Génération...
+        } @else {
+          Générer le quiz
+        }
+      </button>
+    </form>
+  </div>
+
+  @if (generatedQuiz()) {
+    <div class="preview-section">
+      <h2>Aperçu du quiz généré</h2>
+      <div class="quiz-preview">
+        <h3>{{ generatedQuiz()!.title }}</h3>
+        <p>{{ generatedQuiz()!.description }}</p>
+        <div class="quiz-info">
+          <span>Niveau : {{ generatedQuiz()!.level }}</span>
+          <span>Questions : {{ generatedQuiz()!.questions.length }}</span>
+        </div>
+        <div class="questions">
+          <h4>Questions :</h4>
+          <ul>
+            @for (question of generatedQuiz()!.questions; track question.id) {
+              <li>{{ question.text }}</li>
+            }
+          </ul>
+        </div>
+        <button class="save-btn" (click)="saveQuiz()" [disabled]="isSaving()">
+          @if (isSaving()) {
+            Enregistrement...
+          } @else {
+            Enregistrer le quiz
+          }
+        </button>
+      </div>
+    </div>
+  }
+  </div>
+</div>
+
+

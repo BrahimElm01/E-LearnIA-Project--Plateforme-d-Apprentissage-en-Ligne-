@@ -1,0 +1,167 @@
+<div class="home-container">
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-bar-content">
+      <div>
+        <h1>Bonjour, {{ user?.fullName }}</h1>
+        <p>Continuez votre apprentissage</p>
+      </div>
+      <div class="app-bar-actions">
+        <button class="icon-btn" (click)="navigateToProfile()" title="Profil">
+          <span class="icon">👤</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Carousel -->
+  <app-features-carousel></app-features-carousel>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <button class="quick-action-btn" (click)="navigateToMyCourses()">
+      <span class="action-icon">📚</span>
+      <span class="action-text">Mes cours</span>
+    </button>
+    <button class="quick-action-btn" (click)="navigateToQuizzes()">
+      <span class="action-icon">📝</span>
+      <span class="action-text">Quizzes</span>
+    </button>
+    <button class="quick-action-btn analytics-btn" (click)="navigateToAnalytics()">
+      <span class="action-icon">📊</span>
+      <span class="action-text">Analyses</span>
+    </button>
+  </div>
+
+  <div class="content">
+    <!-- Stats Cards -->
+    <div class="stats-section">
+      <div class="stat-card">
+        <div class="stat-icon">📚</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ courses().length }}</div>
+          <div class="stat-label">Cours</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ completedCoursesCount }}</div>
+          <div class="stat-label">Complétés</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📖</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ inProgressCoursesCount }}</div>
+          <div class="stat-label">En cours</div>
+        </div>
+      </div>
+      <div class="stat-card progress-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ globalProgress() }}%</div>
+          <div class="stat-label">Progression globale</div>
+          <div class="progress-bar-mini">
+            <div class="progress-fill-mini" [style.width.%]="globalProgress()"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    @if (categories().length > 0) {
+      <div class="section">
+        <h2 class="section-title">Catégories</h2>
+        <div class="categories-grid">
+          @for (category of categories(); track category) {
+            <div class="category-card" (click)="navigateToCategory(category)">
+              <div class="category-icon">{{ getCategoryIcon(category) }}</div>
+              <div class="category-name">{{ category }}</div>
+              <div class="category-count">{{ getCategoryCourseCount(category) }} cours</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Courses in Progress -->
+    @if (hasInProgressCourses) {
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">Cours en cours</h2>
+          <span class="section-badge">{{ inProgressCourses.length }}</span>
+        </div>
+        <div class="courses-horizontal">
+          @for (course of inProgressCourses; track course.id) {
+            <div class="course-card course-card-horizontal" (click)="navigateToCourse(course.id)">
+              @if (course.imageUrl) {
+                <img [src]="course.imageUrl" [alt]="course.title" class="course-image" />
+              } @else {
+                <div class="course-image-placeholder">📚</div>
+              }
+              <div class="course-info">
+                <div class="course-badge-in-progress">En cours</div>
+                <h3 class="course-title">{{ course.title }}</h3>
+                <p class="course-teacher">Par {{ course.teacherName }}</p>
+                <div class="progress-section">
+                  <div class="progress-header">
+                    <span class="progress-label">Progression</span>
+                    <span class="progress-percentage">{{ getLimitedProgress(course.progress).toFixed(0) }}%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill progress-fill-animated" [style.width.%]="getLimitedProgress(course.progress)"></div>
+                  </div>
+                </div>
+                <button class="continue-btn" (click)="navigateToCourse(course.id); $event.stopPropagation()">
+                  Continuer →
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="section">
+        <h2 class="section-title">Cours en cours</h2>
+        <div class="empty-state">
+          <div class="empty-icon">📖</div>
+          <p class="empty-text">Aucun cours en cours pour le moment</p>
+          <button class="empty-action-btn" (click)="navigateToMyCourses()">
+            Explorer les cours
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- All Courses -->
+    <div class="section">
+      <h2 class="section-title">Tous les cours</h2>
+      @if (isLoading()) {
+        <div class="loading">Chargement...</div>
+      } @else {
+        <div class="courses-grid">
+          @for (course of courses(); track course.id) {
+            <div class="course-card" (click)="navigateToCourse(course.id)">
+              @if (course.imageUrl) {
+                <img [src]="course.imageUrl" [alt]="course.title" class="course-image" />
+              } @else {
+                <div class="course-image-placeholder">📚</div>
+              }
+              <div class="course-info">
+                <h3 class="course-title">{{ course.title }}</h3>
+                <p class="course-teacher">{{ course.teacherName }}</p>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="getLimitedProgress(course.progress)"></div>
+                </div>
+                <p class="progress-text">{{ getLimitedProgress(course.progress).toFixed(0) }}% Complété</p>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+

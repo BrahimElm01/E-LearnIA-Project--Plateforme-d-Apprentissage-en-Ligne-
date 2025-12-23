@@ -1,0 +1,62 @@
+<div class="features-carousel">
+  <div class="carousel-container">
+    <button class="carousel-nav prev" (click)="previousSlide()" aria-label="Slide précédent">
+      ‹
+    </button>
+    
+    <div class="carousel-slide" [style.background]="currentSlideData.gradient">
+      @if (currentSlideData.image) {
+        <div class="slide-background-image">
+          <img [src]="currentSlideData.image" [alt]="currentSlideData.title" />
+          <div class="image-overlay"></div>
+        </div>
+      }
+      <div class="slide-content">
+        <div class="slide-icon">{{ currentSlideData.icon }}</div>
+        <h2 class="slide-title">{{ currentSlideData.title }}</h2>
+        <h3 class="slide-subtitle">{{ currentSlideData.subtitle }}</h3>
+        <p class="slide-description">{{ currentSlideData.description }}</p>
+        
+        <div class="slide-features">
+          @for (feature of currentSlideData.features; track feature) {
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>{{ feature }}</span>
+            </div>
+          }
+        </div>
+        
+        <button 
+          class="slide-button" 
+          (click)="navigateToFeature(currentSlideData.buttonRoute)">
+          {{ currentSlideData.buttonText }}
+        </button>
+      </div>
+      
+      <div class="slide-graphics">
+        <div class="graphic-element graphic-1">📚</div>
+        <div class="graphic-element graphic-2">🎯</div>
+        <div class="graphic-element graphic-3">📈</div>
+        <div class="graphic-element graphic-4">✨</div>
+      </div>
+    </div>
+    
+    <button class="carousel-nav next" (click)="nextSlide()" aria-label="Slide suivant">
+      ›
+    </button>
+  </div>
+  
+  <div class="carousel-indicators">
+    @for (slide of slides; track slide.id; let i = $index) {
+      <button 
+        class="indicator" 
+        [class.active]="currentSlide() === i"
+        (click)="goToSlide(i)"
+        [attr.aria-label]="'Aller au slide ' + (i + 1)">
+      </button>
+    }
+  </div>
+</div>
+
+
+

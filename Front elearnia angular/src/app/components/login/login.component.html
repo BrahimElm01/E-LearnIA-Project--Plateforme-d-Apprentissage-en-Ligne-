@@ -1,0 +1,92 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>E-LearnIA</h1>
+      <p>Plateforme d'apprentissage intelligente</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Sélection du rôle -->
+      <div class="role-selector">
+        <button
+          type="button"
+          class="role-btn"
+          [class.active]="selectedRole() === 'LEARNER'"
+          (click)="selectedRole.set('LEARNER')"
+        >
+          Étudiant
+        </button>
+        <button
+          type="button"
+          class="role-btn"
+          [class.active]="selectedRole() === 'TEACHER'"
+          (click)="selectedRole.set('TEACHER')"
+        >
+          Professeur
+        </button>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="votre@email.com"
+          [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+        />
+        @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+          <span class="error-text">Email invalide</span>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+        />
+        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+          <span class="error-text">Mot de passe requis (min. 6 caractères)</span>
+        }
+      </div>
+
+      <!-- Error message -->
+      @if (errorMessage()) {
+        <div class="error-message">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- Submit button -->
+      <button
+        type="submit"
+        class="submit-btn"
+        [disabled]="loginForm.invalid || isLoading()"
+      >
+        @if (isLoading()) {
+          <span>Connexion...</span>
+        } @else {
+          <span>Se connecter</span>
+        }
+      </button>
+    </form>
+
+    <div class="register-link">
+      <p>Pas encore de compte ? <a (click)="navigateToRegister()">S'inscrire</a></p>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+

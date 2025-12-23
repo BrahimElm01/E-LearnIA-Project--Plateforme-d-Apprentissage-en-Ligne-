@@ -1,0 +1,204 @@
+<div class="edit-quiz-container">
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-bar-content">
+      <div>
+        <h1>Modifier le quiz</h1>
+        <p>{{ quiz()?.title || 'Chargement...' }}</p>
+        @if (!isStandalone() && courseId()) {
+          <span class="quiz-type-badge">📚 Quiz lié à un cours</span>
+        } @else {
+          <span class="quiz-type-badge">🎯 Quiz standalone</span>
+        }
+      </div>
+      <div class="app-bar-actions">
+        <button class="icon-btn" (click)="cancel()" title="Retour">
+          <span class="icon">←</span>
+        </button>
+        <button class="icon-btn" (click)="cancel()" title="Accueil">
+          <span class="icon">🏠</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    @if (isLoading()) {
+      <div class="loading">Chargement du quiz...</div>
+    } @else if (errorMessage() && !quiz()) {
+      <div class="error-message">
+        <p>{{ errorMessage() }}</p>
+        <button class="btn-primary" (click)="cancel()">Retour</button>
+      </div>
+    } @else if (quiz()) {
+      <form [formGroup]="quizForm" (ngSubmit)="onSubmit()">
+        <!-- Informations générales -->
+        <div class="form-section">
+          <h2>Informations générales</h2>
+          
+          <div class="form-group">
+            <label for="title">Titre du quiz *</label>
+            <input id="title" type="text" formControlName="title" placeholder="Ex: Quiz Flutter - Niveau débutant" />
+            @if (quizForm.get('title')?.invalid && quizForm.get('title')?.touched) {
+              <span class="error">Titre requis (min. 3 caractères)</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" formControlName="description" rows="3" placeholder="Décrivez le quiz..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="passingScore">Score minimum (%) *</label>
+              <input id="passingScore" type="number" formControlName="passingScore" min="0" max="100" />
+              @if (quizForm.get('passingScore')?.invalid && quizForm.get('passingScore')?.touched) {
+                <span class="error">Score entre 0 et 100</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="maxAttempts">Tentatives maximum *</label>
+              <input id="maxAttempts" type="number" formControlName="maxAttempts" min="1" />
+              @if (quizForm.get('maxAttempts')?.invalid && quizForm.get('maxAttempts')?.touched) {
+                <span class="error">Au moins 1 tentative</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="level">Niveau *</label>
+              <select id="level" formControlName="level">
+                <option value="BEGINNER">Débutant</option>
+                <option value="INTERMEDIATE">Intermédiaire</option>
+                <option value="ADVANCED">Avancé</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Questions -->
+        <div class="form-section">
+          <div class="section-header">
+            <h2>Questions ({{ questionsFormArray.length }})</h2>
+            <button type="button" class="btn-add" (click)="addQuestion()">
+              <span>➕</span> Ajouter une question
+            </button>
+          </div>
+
+          <div class="questions-list">
+            @for (question of questionsFormArray.controls; track $index; let i = $index) {
+              <div class="question-card">
+                <div class="question-header">
+                  <div class="question-title-section">
+                    <h3>Question {{ i + 1 }}</h3>
+                    <div class="question-actions">
+                      <button type="button" class="btn-move" (click)="moveQuestionUp(i)" [disabled]="i === 0" title="Monter">
+                        ⬆️
+                      </button>
+                      <button type="button" class="btn-move" (click)="moveQuestionDown(i)" [disabled]="i === questionsFormArray.length - 1" title="Descendre">
+                        ⬇️
+                      </button>
+                      <button type="button" class="btn-remove" (click)="removeQuestion(i)" [disabled]="questionsFormArray.length === 1" title="Supprimer">
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Texte de la question *</label>
+                  <textarea 
+                    [formControl]="getQuestionControl(i, 'text')" 
+                    rows="2" 
+                    placeholder="Ex: Qu'est-ce que Flutter ?">
+                  </textarea>
+                  @if (getQuestionControl(i, 'text')?.invalid && getQuestionControl(i, 'text')?.touched) {
+                    <span class="error">Texte requis (min. 5 caractères)</span>
+                  }
+                </div>
+
+                <div class="form-group">
+                  <div class="options-header">
+                    <label>Options de réponse *</label>
+                    <button type="button" class="btn-add-option" (click)="addOption(i)">
+                      ➕ Ajouter une option
+                    </button>
+                  </div>
+                  <div class="options-list">
+                    @for (optionCtrl of getQuestionOptions(i).controls; track $index; let j = $index) {
+                      <div class="option-item" [class.correct-option]="getQuestionControl(i, 'correctAnswer')?.value === getOptionControl(i, j).value">
+                        <div class="option-number">{{ j + 1 }}</div>
+                        <input 
+                          type="text" 
+                          [formControl]="getOptionControl(i, j)" 
+                          [placeholder]="'Option ' + (j + 1)"
+                          class="option-input"
+                        />
+                        <div class="option-actions">
+                          <button 
+                            type="button" 
+                            class="btn-mark-correct"
+                            [class.active]="getQuestionControl(i, 'correctAnswer')?.value === getOptionControl(i, j).value"
+                            (click)="getQuestionControl(i, 'correctAnswer')?.setValue(getOptionControl(i, j).value)"
+                            title="Marquer comme réponse correcte">
+                            @if (getQuestionControl(i, 'correctAnswer')?.value === getOptionControl(i, j).value) {
+                              ✅ Correcte
+                            } @else {
+                              ✓ Marquer correcte
+                            }
+                          </button>
+                          <button 
+                            type="button" 
+                            class="btn-remove-option"
+                            (click)="removeOption(i, j)"
+                            [disabled]="getQuestionOptions(i).length <= 2"
+                            title="Supprimer cette option">
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  @if (getQuestionControl(i, 'correctAnswer')?.invalid && getQuestionControl(i, 'correctAnswer')?.touched) {
+                    <span class="error">Veuillez sélectionner une réponse correcte</span>
+                  }
+                  @if (getQuestionControl(i, 'correctAnswer')?.value) {
+                    <div class="correct-answer-indicator">
+                      ✅ Réponse correcte sélectionnée : "{{ getQuestionControl(i, 'correctAnswer')?.value }}"
+                    </div>
+                  }
+                </div>
+
+                <div class="form-group">
+                  <label>Points</label>
+                  <input type="number" [formControl]="getQuestionControl(i, 'points')" min="1" />
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="cancel()">Annuler</button>
+          <button type="button" class="btn-danger" (click)="deleteQuiz()">Supprimer le quiz</button>
+          <button type="submit" class="btn-primary" [disabled]="quizForm.invalid || isSaving()">
+            @if (isSaving()) {
+              <span>⏳</span> Enregistrement...
+            } @else {
+              Enregistrer les modifications
+            }
+          </button>
+        </div>
+
+        @if (errorMessage()) {
+          <div class="error-alert">
+            <span class="error-icon">⚠️</span>
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+      </form>
+    }
+  </div>
+</div>

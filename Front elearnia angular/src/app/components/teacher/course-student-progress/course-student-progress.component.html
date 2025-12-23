@@ -1,0 +1,111 @@
+<div class="progress-container">
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-bar-content">
+      <div>
+        <h1>Progression des étudiants</h1>
+        <p>{{ course()?.title || 'Chargement...' }}</p>
+      </div>
+      <div class="app-bar-actions">
+        <button class="icon-btn" (click)="navigateBack()" title="Retour">
+          <span class="icon">←</span>
+        </button>
+        <button class="icon-btn" (click)="navigateBack()" title="Accueil">
+          <span class="icon">🏠</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    @if (isLoading()) {
+      <div class="loading">Chargement de la progression...</div>
+    } @else if (errorMessage()) {
+      <div class="error-message">
+        <p>{{ errorMessage() }}</p>
+        <button class="btn btn-primary" (click)="loadStudentProgress()">Réessayer</button>
+      </div>
+    } @else if (students().length === 0) {
+      <div class="info-message">
+        <p>Aucun étudiant inscrit à ce cours pour le moment.</p>
+      </div>
+    } @else {
+      <div class="stats-summary">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-value">{{ students().length }}</div>
+          <div class="stat-label">Étudiants inscrits</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value">{{ getCompletedCount() }}</div>
+          <div class="stat-label">Cours terminés</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-value">{{ getAverageProgressFormatted() }}%</div>
+          <div class="stat-label">Progression moyenne</div>
+        </div>
+      </div>
+
+      <div class="students-table">
+        <div class="table-header">
+          <div class="col-name">Étudiant</div>
+          <div class="col-email">Email</div>
+          <div class="col-progress">Progression</div>
+          <div class="col-status">Statut</div>
+          <div class="col-rating">Note</div>
+          <div class="col-actions">Actions</div>
+        </div>
+        
+        @for (student of students(); track student.studentId) {
+          <div class="table-row">
+            <div class="col-name">
+              <div class="student-name">{{ student.fullName }}</div>
+            </div>
+            <div class="col-email">
+              <div class="student-email">{{ student.email }}</div>
+            </div>
+            <div class="col-progress">
+              <div class="progress-bar-container">
+                <div class="progress-bar" [style.width.%]="student.progress" [style.background-color]="getProgressColor(student.progress)"></div>
+                <span class="progress-text">{{ formatProgress(student.progress) }}%</span>
+              </div>
+            </div>
+            <div class="col-status">
+              @if (student.completed) {
+                <span class="badge badge-success">✅ Terminé</span>
+              } @else {
+                <span class="badge badge-in-progress">🔄 En cours</span>
+              }
+            </div>
+            <div class="col-rating">
+              @if (student.rating) {
+                <div class="rating">
+                  <span class="stars">{{ getRatingStars(student.rating) }}</span>
+                  <span class="rating-value">({{ formatRating(student.rating) }})</span>
+                </div>
+              } @else {
+                <span class="no-rating">Non noté</span>
+              }
+            </div>
+            <div class="col-actions">
+              <button 
+                class="action-btn reset-progress-btn" 
+                (click)="resetStudentProgress(student.studentId)"
+                title="Réinitialiser la progression à 0%">
+                🔄 Réinitialiser progression
+              </button>
+              <button 
+                class="action-btn reset-btn" 
+                (click)="resetQuizAttempts(student.studentId)"
+                title="Réinitialiser les tentatives de quiz">
+                📝 Réinitialiser tentatives
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

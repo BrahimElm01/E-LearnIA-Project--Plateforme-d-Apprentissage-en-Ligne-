@@ -1,0 +1,40 @@
+<div class="progress-container">
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-bar-content">
+      <div>
+        <h1>Suivi des élèves</h1>
+        <p>Progression des étudiants inscrits</p>
+      </div>
+      <div class="app-bar-actions">
+        <button class="icon-btn" (click)="navigateToHome()" title="Accueil">
+          <span class="icon">🏠</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    @if (isLoading()) {
+      <div class="loading">Chargement...</div>
+    } @else if (courses().length === 0) {
+      <div class="info-message">
+        <p>Aucun cours disponible</p>
+      </div>
+    } @else {
+      <div class="courses-list">
+        @for (course of courses(); track course.id) {
+          <div class="course-card">
+            <h3>{{ course.title }}</h3>
+            <p>{{ course.description }}</p>
+            <button class="btn btn-primary" (click)="viewCourseProgress(course.id)">
+              Voir la progression
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+

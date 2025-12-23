@@ -1,0 +1,165 @@
+<div class="quizzes-container">
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-bar-content">
+      <div>
+        <h1>Mes quizzes</h1>
+        <p>Gérer tous vos quizzes générés</p>
+      </div>
+      <div class="app-bar-actions">
+        <button class="icon-btn" (click)="navigateToHome()" title="Accueil">
+          <span class="icon">🏠</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    @if (isLoading()) {
+      <div class="loading">Chargement de vos quizzes...</div>
+    } @else if (errorMessage()) {
+      <div class="error-message">
+        <p>{{ errorMessage() }}</p>
+        <button class="btn-primary" (click)="loadQuizzes()">Réessayer</button>
+      </div>
+    } @else if (quizzes().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📝</div>
+        <h2>Aucun quiz disponible</h2>
+        <p>Vous n'avez pas encore créé de quiz.</p>
+        <button class="btn-primary" (click)="navigateToGenerateQuiz()">Créer un quiz</button>
+      </div>
+    } @else {
+      <!-- Statistiques -->
+      <div class="stats-section">
+        <div class="stat-card">
+          <div class="stat-icon">📝</div>
+          <div class="stat-info">
+            <div class="stat-value">{{ getTotalQuizzes() }}</div>
+            <div class="stat-label">Total quizzes</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-info">
+            <div class="stat-value">{{ getStandaloneQuizzes() }}</div>
+            <div class="stat-label">Standalone</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-info">
+            <div class="stat-value">{{ getCourseQuizzes() }}</div>
+            <div class="stat-label">Liés aux cours</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtres -->
+      <div class="filters-section">
+        <div class="filters">
+          <div class="search-box">
+            <input 
+              type="text" 
+              placeholder="Rechercher un quiz..." 
+              [value]="searchQuery()"
+              (input)="searchQuery.set($any($event.target).value); onSearchChange()"
+              class="search-input"
+            />
+            <span class="search-icon">🔍</span>
+          </div>
+
+          <div class="filter-buttons">
+            <button 
+              class="filter-btn" 
+              [class.active]="filterType() === 'all'"
+              (click)="onFilterChange('all')">
+              Tous
+            </button>
+            <button 
+              class="filter-btn" 
+              [class.active]="filterType() === 'standalone'"
+              (click)="onFilterChange('standalone')">
+              Standalone
+            </button>
+            <button 
+              class="filter-btn" 
+              [class.active]="filterType() === 'course'"
+              (click)="onFilterChange('course')">
+              Liés aux cours
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Liste des quizzes -->
+      @if (filteredQuizzes().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <h2>Aucun quiz trouvé</h2>
+          <p>Aucun quiz ne correspond à vos critères de recherche.</p>
+        </div>
+      } @else {
+        <div class="quizzes-grid">
+          @for (quiz of filteredQuizzes(); track quiz.id) {
+            <div class="quiz-card">
+              <div class="quiz-header">
+                <h3>{{ quiz.title }}</h3>
+                <span class="level-badge" [style.background-color]="getLevelColor(quiz.level)">
+                  {{ getLevelLabel(quiz.level) }}
+                </span>
+              </div>
+
+              @if (quiz.description) {
+                <p class="description">{{ quiz.description }}</p>
+              }
+
+              <div class="quiz-info">
+                <div class="info-item">
+                  <span class="info-icon">❓</span>
+                  <span class="info-text">{{ (quiz.questions || []).length }} questions</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-icon">🎯</span>
+                  <span class="info-text">Score min: {{ quiz.passingScore }}%</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-icon">🔄</span>
+                  <span class="info-text">{{ quiz.maxAttempts }} tentatives max</span>
+                </div>
+              </div>
+
+              <div class="quiz-footer">
+                <div class="quiz-type-section">
+                  @if (quiz.courseId) {
+                    <span class="quiz-type course">📚 Lié à un cours</span>
+                  } @else {
+                    <span class="quiz-type standalone">🎯 Quiz standalone</span>
+                  }
+                </div>
+                <div class="quiz-actions">
+                  <button class="action-btn edit-btn" (click)="editQuiz(quiz.id)" title="Modifier">
+                    ✏️ Modifier
+                  </button>
+                  @if (!quiz.courseId) {
+                    <button class="action-btn delete-btn" (click)="deleteQuiz(quiz.id)" title="Supprimer">
+                      🗑️ Supprimer
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- Bouton d'action -->
+    <div class="action-section">
+      <button class="btn-primary create-btn" (click)="navigateToGenerateQuiz()">
+        <span class="btn-icon">➕</span>
+        Créer un nouveau quiz
+      </button>
+    </div>
+  </div>
+</div>

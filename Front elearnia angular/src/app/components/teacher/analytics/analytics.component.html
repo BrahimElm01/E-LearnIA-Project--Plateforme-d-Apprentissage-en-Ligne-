@@ -1,0 +1,284 @@
+<div class="analytics-container">
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-bar-content">
+      <div>
+        <h1>Analyses</h1>
+        <p>Dashboard professionnel - Statistiques complètes</p>
+      </div>
+      <div class="app-bar-actions">
+        <button class="icon-btn" (click)="navigateToHome()" title="Accueil">
+          <span class="icon">🏠</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    @if (isLoading()) {
+      <div class="loading">
+        <div class="spinner">⏳</div>
+        <p>Chargement des données...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="error-message">
+        <p>{{ errorMessage() }}</p>
+        <button class="btn-primary" (click)="loadDashboardData()">Réessayer</button>
+      </div>
+    } @else {
+      <!-- Statistiques principales -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-value">{{ dashboardStats()?.totalStudents || analytics()?.totalStudents || 0 }}</div>
+          <div class="stat-label">Étudiants totaux</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-value">{{ dashboardStats()?.activeCourses || analytics()?.activeCourses || 0 }}</div>
+          <div class="stat-label">Cours actifs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📝</div>
+          <div class="stat-value">{{ dashboardStats()?.totalQuizzes || quizzes().length }}</div>
+          <div class="stat-label">Quizzes créés</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-value">{{ formatNumber(dashboardStats()?.averageRating || analytics()?.averageRating || 0) }}</div>
+          <div class="stat-label">Note moyenne</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-value">{{ formatNumber(dashboardStats()?.averageProgress || 0) }}%</div>
+          <div class="stat-label">Progression moyenne</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value">{{ dashboardStats()?.completedCourses || 0 }}</div>
+          <div class="stat-label">Cours complétés</div>
+        </div>
+      </div>
+
+      <!-- Graphiques et visualisations -->
+      <div class="charts-section">
+        <div class="chart-card">
+          <h2 class="section-title">Répartition des étudiants</h2>
+          <div class="chart-container">
+            <div class="progress-chart">
+              @for (item of getStudentsByProgress(); track item.label) {
+                <div class="chart-item">
+                  <div class="chart-label">
+                    <span class="chart-color" [style.background-color]="item.color"></span>
+                    <span>{{ item.label }}</span>
+                  </div>
+                  <div class="chart-bar-container">
+                    <div class="chart-bar" [style.width.%]="(item.count / (allStudentProgress().length || 1)) * 100" [style.background-color]="item.color"></div>
+                    <span class="chart-value">{{ item.count }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h2 class="section-title">Top 5 cours populaires</h2>
+          <div class="top-courses-list">
+            @for (stat of getTopCourses(5); track stat.course.id) {
+              <div class="top-item">
+                <div class="top-item-info">
+                  <h4>{{ stat.course.title }}</h4>
+                  <p>{{ stat.enrollments }} inscriptions</p>
+                </div>
+                <div class="top-item-stats">
+                  <div class="mini-stat">
+                    <span class="mini-label">Progression</span>
+                    <span class="mini-value">{{ formatNumber(stat.averageProgress) }}%</span>
+                  </div>
+                  <div class="mini-stat">
+                    <span class="mini-label">Complétés</span>
+                    <span class="mini-value">{{ stat.completed }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+            @if (getTopCourses(5).length === 0) {
+              <p class="empty-text">Aucun cours avec des inscriptions</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistiques détaillées des cours -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">Statistiques par cours</h2>
+          <span class="section-count">{{ courseStats().length }} cours</span>
+        </div>
+        @if (courseStats().length === 0) {
+          <div class="empty-state">
+            <p>Aucune statistique disponible pour le moment</p>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Cours</th>
+                  <th>Inscriptions</th>
+                  <th>Progression moyenne</th>
+                  <th>Complétés</th>
+                  <th>Note moyenne</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (stat of courseStats(); track stat.course.id) {
+                  <tr>
+                    <td>
+                      <div class="course-cell">
+                        <strong>{{ stat.course.title }}</strong>
+                        <span class="course-status" [class.published]="stat.course.published">
+                          {{ stat.course.published ? 'Publié' : 'Brouillon' }}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge">{{ stat.enrollments }}</span>
+                    </td>
+                    <td>
+                      <div class="progress-cell">
+                        <div class="progress-bar-mini" [style.width.%]="stat.averageProgress" [style.background-color]="getProgressColor(stat.averageProgress)"></div>
+                        <span>{{ formatNumber(stat.averageProgress) }}%</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge badge-success">{{ stat.completed }}</span>
+                    </td>
+                    <td>
+                      @if (stat.averageRating > 0) {
+                        <span class="rating-badge" [style.background-color]="getRatingColor(stat.averageRating)">
+                          ⭐ {{ formatNumber(stat.averageRating) }}
+                        </span>
+                      } @else {
+                        <span class="no-rating">Non noté</span>
+                      }
+                    </td>
+                    <td>
+                      <button class="btn-link" (click)="navigateToCourse(stat.course.id)">Voir</button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- Statistiques des quizzes -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">Statistiques des quizzes</h2>
+          <span class="section-count">{{ quizStats().length }} quizzes</span>
+        </div>
+        @if (quizStats().length === 0) {
+          <div class="empty-state">
+            <p>Aucun quiz créé pour le moment</p>
+            <button class="btn-primary" (click)="navigateToQuizzes()">Créer un quiz</button>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Quiz</th>
+                  <th>Type</th>
+                  <th>Tentatives</th>
+                  <th>Score moyen</th>
+                  <th>Réussis</th>
+                  <th>Échoués</th>
+                  <th>Taux de réussite</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (stat of quizStats(); track stat.quiz.id) {
+                  <tr>
+                    <td>
+                      <strong>{{ stat.quiz.title }}</strong>
+                      @if (stat.quiz.description) {
+                        <p class="quiz-description">{{ stat.quiz.description }}</p>
+                      }
+                    </td>
+                    <td>
+                      @if (stat.quiz.courseId) {
+                        <span class="badge badge-course">📚 Cours</span>
+                      } @else {
+                        <span class="badge badge-standalone">🎯 Standalone</span>
+                      }
+                    </td>
+                    <td>
+                      <span class="badge">{{ stat.totalAttempts }}</span>
+                    </td>
+                    <td>
+                      @if (stat.totalAttempts > 0) {
+                        <span class="score-badge" [style.background-color]="getProgressColor(stat.averageScore)">
+                          {{ formatNumber(stat.averageScore) }}%
+                        </span>
+                      } @else {
+                        <span class="no-data">Aucune tentative</span>
+                      }
+                    </td>
+                    <td>
+                      <span class="badge badge-success">{{ stat.passed }}</span>
+                    </td>
+                    <td>
+                      <span class="badge badge-danger">{{ stat.failed }}</span>
+                    </td>
+                    <td>
+                      @if (stat.totalAttempts > 0) {
+                        <span class="success-rate" [style.color]="getProgressColor((stat.passed / stat.totalAttempts) * 100)">
+                          {{ formatNumber((stat.passed / stat.totalAttempts) * 100) }}%
+                        </span>
+                      } @else {
+                        <span class="no-data">N/A</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- Top quizzes -->
+      <div class="section-card">
+        <h2 class="section-title">Top 5 quizzes les plus tentés</h2>
+        <div class="top-quizzes-list">
+          @for (stat of getTopQuizzes(5); track stat.quiz.id) {
+            <div class="top-item">
+              <div class="top-item-info">
+                <h4>{{ stat.quiz.title }}</h4>
+                <p>{{ stat.totalAttempts }} tentatives</p>
+              </div>
+              <div class="top-item-stats">
+                <div class="mini-stat">
+                  <span class="mini-label">Score moyen</span>
+                  <span class="mini-value">{{ formatNumber(stat.averageScore) }}%</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-label">Réussis</span>
+                  <span class="mini-value">{{ stat.passed }}</span>
+                </div>
+              </div>
+            </div>
+          }
+          @if (getTopQuizzes(5).length === 0) {
+            <p class="empty-text">Aucun quiz avec des tentatives</p>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

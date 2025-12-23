@@ -1,0 +1,125 @@
+<div class="course-reader-container">
+  @if (isLoading()) {
+    <div class="loading">
+      <div class="spinner">⏳</div>
+      <p>Chargement du cours...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="error-container">
+      <div class="error-icon">⚠️</div>
+      <h2>Erreur</h2>
+      <p>{{ errorMessage() }}</p>
+      <button class="btn-primary" (click)="navigateBack()">Retour au cours</button>
+    </div>
+  } @else if (course() && lessons().length > 0) {
+    <!-- Header -->
+    <div class="reader-header">
+      <button class="btn-back" (click)="navigateBack()">
+        <span class="arrow">←</span>
+        Retour aux cours
+      </button>
+      <div class="course-title-section">
+        <div class="course-icon">📖</div>
+        <div>
+          <h1>{{ course()!.title }}</h1>
+          <p class="course-description">{{ course()!.description }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="reader-content">
+      <!-- Sidebar - Chapitres -->
+      <div class="sidebar" [class.open]="sidebarOpen()">
+        <div class="sidebar-header">
+          <h2>Chapitres</h2>
+          <button class="btn-toggle-sidebar" (click)="toggleSidebar()">
+            @if (sidebarOpen()) {
+              <span>☰</span>
+            } @else {
+              <span>☰</span>
+            }
+          </button>
+        </div>
+        <div class="chapters-list">
+          @for (lesson of lessons(); track lesson.id; let i = $index) {
+            <div 
+              class="chapter-item" 
+              [class.active]="currentLesson()?.id === lesson.id"
+              [class.completed]="isLessonCompleted(lesson.id)"
+              (click)="selectLesson(lesson, i)">
+              <div class="chapter-number">
+                @if (isLessonCompleted(lesson.id)) {
+                  <span class="checkmark">✓</span>
+                } @else {
+                  {{ i + 1 }}
+                }
+              </div>
+              <div class="chapter-info">
+                <div class="chapter-title">{{ lesson.title }}</div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Main Content Area -->
+      <div class="main-content" [class.sidebar-closed]="!sidebarOpen()">
+        @if (currentLesson()) {
+          <div class="lesson-content">
+            <!-- Lesson Header -->
+            <div class="lesson-header">
+              <div class="lesson-title-section">
+                <div class="lesson-icon">📚</div>
+                <div>
+                  <h2 class="lesson-title">{{ currentLesson()!.title }}</h2>
+                  <div class="lesson-meta">
+                    <span class="lesson-progress">{{ currentLessonIndex() + 1 }}/{{ lessons().length }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lesson Content -->
+            @if (currentLesson()!.description) {
+              <div class="lesson-content-body" [innerHTML]="formatLessonContent(currentLesson()!.description!)"></div>
+            } @else {
+              <div class="no-content">
+                <p>Aucun contenu disponible pour cette leçon.</p>
+              </div>
+            }
+
+            <!-- Navigation Buttons -->
+            <div class="lesson-navigation">
+              <button 
+                class="btn-nav btn-prev" 
+                (click)="navigateToPreviousLesson()"
+                [disabled]="currentLessonIndex() === 0">
+                <span>←</span>
+                Leçon précédente
+              </button>
+              <button 
+                class="btn-nav btn-next" 
+                (click)="navigateToNextLesson()"
+                [disabled]="currentLessonIndex() === lessons().length - 1">
+                Leçon suivante
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+        } @else {
+          <div class="no-lesson-selected">
+            <p>Sélectionnez une leçon dans le menu latéral pour commencer.</p>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="error-container">
+      <div class="error-icon">❌</div>
+      <h2>Cours non trouvé</h2>
+      <p>Le cours demandé n'existe pas ou n'est plus disponible.</p>
+      <button class="btn-primary" (click)="navigateBack()">Retour aux cours</button>
+    </div>
+  }
+</div>
+

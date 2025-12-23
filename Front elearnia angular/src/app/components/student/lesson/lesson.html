@@ -1,0 +1,183 @@
+<div class="lesson-container">
+  @if (isLoading()) {
+    <div class="loading">
+      <div class="spinner">⏳</div>
+      <p>Chargement de la leçon...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="error-container">
+      <div class="error-icon">⚠️</div>
+      <h2>Erreur</h2>
+      <p>{{ errorMessage() }}</p>
+      <button class="btn-primary" (click)="navigateBack()">Retour au cours</button>
+    </div>
+  } @else if (lesson()) {
+    <div class="lesson-header">
+      <button class="back-btn" (click)="navigateBack()">
+        ← Retour au cours
+      </button>
+      <h1>{{ lesson()!.title }}</h1>
+      @if (lesson()!.duration) {
+        <span class="lesson-duration-badge">⏱️ {{ lesson()!.duration }} minutes</span>
+      }
+    </div>
+
+    <div class="lesson-content">
+      @if (lesson()!.videoUrl) {
+        <div class="video-section">
+          <h2>Vidéo de la leçon</h2>
+          <div class="video-wrapper">
+            @if (isUploadedVideo() && uploadedVideoUrl()) {
+              <!-- Vidéo uploadée - utiliser la balise <video> -->
+              <video
+                [src]="uploadedVideoUrl()!"
+                controls
+                class="video-player"
+                preload="metadata">
+                Votre navigateur ne supporte pas la lecture de vidéos.
+              </video>
+            } @else if (videoSafeUrl()) {
+              <!-- Vidéo YouTube - utiliser iframe -->
+              <iframe
+                [src]="videoSafeUrl()!"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                class="video-player"
+                loading="lazy">
+              </iframe>
+            } @else {
+              <div class="no-video-error">
+                <div class="error-icon">⚠️</div>
+                <p>Vidéo non disponible</p>
+                <p class="error-detail">Cette vidéo n'est pas disponible ou l'URL est invalide.</p>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="no-video">
+          <p>Aucune vidéo disponible pour cette leçon.</p>
+        </div>
+      }
+    </div>
+
+    <!-- Quiz après chaque leçon -->
+    <div class="quiz-section">
+      @if (quiz()) {
+        <div class="quiz-card-mobile">
+          <div class="quiz-icon">❓</div>
+          <div class="quiz-content">
+            <h3 class="quiz-title">{{ quiz()!.title || 'Quiz de la leçon' }}</h3>
+            <p class="quiz-description">
+              {{ quiz()!.description || 'Passez le quiz pour continuer au prochain chapitre' }}
+            </p>
+            <button class="btn-quiz-mobile" (click)="navigateToQuiz()">
+              <span class="play-icon">▶</span>
+              Passer le quiz
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="quiz-card-mobile quiz-placeholder">
+          <div class="quiz-icon">❓</div>
+          <div class="quiz-content">
+            <h3 class="quiz-title">Quiz de la leçon</h3>
+            <p class="quiz-description">
+              Aucun quiz disponible pour cette leçon pour le moment.
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Section des avis -->
+    <div class="reviews-section">
+      <div class="reviews-header">
+        <h2>Avis des étudiants ({{ reviews().length }})</h2>
+        @if (isEnrolled()) {
+          <button class="btn-add-review" (click)="toggleReviewForm()">
+            {{ showReviewForm() ? 'Annuler' : '➕ Ajouter un avis' }}
+          </button>
+        }
+      </div>
+
+      @if (showReviewForm()) {
+        <div class="review-form-card">
+          <h3>Votre avis</h3>
+          <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+            <div class="form-group">
+              <label>Note (1-5 étoiles) *</label>
+              <select formControlName="rating" class="rating-select">
+                <option [value]="5">⭐⭐⭐⭐⭐ (5)</option>
+                <option [value]="4">⭐⭐⭐⭐ (4)</option>
+                <option [value]="3">⭐⭐⭐ (3)</option>
+                <option [value]="2">⭐⭐ (2)</option>
+                <option [value]="1">⭐ (1)</option>
+              </select>
+              @if (reviewForm.get('rating')?.invalid && reviewForm.get('rating')?.touched) {
+                <span class="error">Note requise</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label>Commentaire *</label>
+              <textarea 
+                formControlName="comment" 
+                rows="4" 
+                placeholder="Partagez votre expérience avec ce cours...">
+              </textarea>
+              @if (reviewForm.get('comment')?.invalid && reviewForm.get('comment')?.touched) {
+                <span class="error">Commentaire requis (min. 10 caractères)</span>
+              }
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="toggleReviewForm()">Annuler</button>
+              <button type="submit" class="btn-primary" [disabled]="reviewForm.invalid || isSubmittingReview()">
+                @if (isSubmittingReview()) {
+                  Envoi...
+                } @else {
+                  Publier l'avis
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      @if (reviews().length === 0) {
+        <div class="empty-reviews">
+          <p>Aucun avis pour le moment. Soyez le premier à laisser un avis !</p>
+        </div>
+      } @else {
+        <div class="reviews-list">
+          @for (review of reviews(); track review.id) {
+            <div class="review-card">
+              <div class="review-header">
+                <div class="review-author">
+                  <strong>{{ review.studentName || 'Étudiant' }}</strong>
+                </div>
+                <div class="review-rating">
+                  {{ getStars(review.rating) }} ({{ review.rating }}/5)
+                </div>
+              </div>
+              @if (review.comment) {
+                <p class="review-comment">{{ review.comment }}</p>
+              }
+              @if (review.createdAt) {
+                <span class="review-date">{{ review.createdAt | date:'dd/MM/yyyy' }}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="lesson-footer">
+      <button class="btn-primary" (click)="navigateBack()">
+        Retour au cours
+      </button>
+    </div>
+  }
+</div>

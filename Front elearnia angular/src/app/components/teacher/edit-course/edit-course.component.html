@@ -1,0 +1,396 @@
+<div class="edit-course-container">
+  <div class="header-top">
+    <button class="back-btn" (click)="navigateBack()" title="Retour aux cours">
+      ← Retour
+    </button>
+  </div>
+  <div class="form-card">
+    <h1>Modifier le cours</h1>
+    
+    @if (isLoading()) {
+      <div class="loading">Chargement du cours...</div>
+    } @else {
+      @if (errorMessage()) {
+        <div class="alert alert-error">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <form [formGroup]="courseForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="title">Titre du cours *</label>
+          <input 
+            id="title" 
+            type="text" 
+            formControlName="title" 
+            placeholder="Ex: Introduction à Flutter"
+          />
+          @if (courseForm.get('title')?.invalid && courseForm.get('title')?.touched) {
+            <span class="error">Titre requis (min. 3 caractères)</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description *</label>
+          <textarea 
+            id="description" 
+            formControlName="description" 
+            rows="6"
+            placeholder="Décrivez votre cours en détail..."
+          ></textarea>
+          @if (courseForm.get('description')?.invalid && courseForm.get('description')?.touched) {
+            <span class="error">Description requise (min. 10 caractères)</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="published">Statut de publication</label>
+          <div class="checkbox-group">
+            <input 
+              id="published" 
+              type="checkbox" 
+              formControlName="published"
+            />
+            <label for="published" class="checkbox-label">
+              Publier le cours (visible par les étudiants)
+            </label>
+          </div>
+          <p class="help-text">
+            Si coché, le cours sera visible par les étudiants. Sinon, il restera en brouillon.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label for="image">Image du cours</label>
+          @if (imagePreview()) {
+            <div class="image-preview-container">
+              <img 
+                [src]="imagePreview()!" 
+                alt="Aperçu" 
+                class="image-preview"
+                (error)="onImageError($event)"
+                (load)="onImageLoad($event)"
+              />
+              <button type="button" class="remove-image-btn" (click)="removeImage()">
+                ✕ Supprimer l'image
+              </button>
+            </div>
+          }
+          <input 
+            id="image" 
+            type="file" 
+            accept="image/*" 
+            (change)="onFileSelected($event)"
+            class="file-input"
+          />
+          <p class="help-text">
+            Choisissez une nouvelle image pour remplacer l'image actuelle, ou laissez vide pour conserver l'image existante.
+          </p>
+        </div>
+
+        <!-- Section Leçons/Vidéos -->
+        <div class="lessons-section">
+          <div class="section-header">
+            <h2>Leçons et Vidéos</h2>
+            <button type="button" class="add-lesson-btn" (click)="openLessonForm()">
+              ➕ Ajouter une leçon
+            </button>
+          </div>
+
+          @if (isLoadingLessons()) {
+            <div class="loading-lessons">Chargement des leçons...</div>
+          } @else if (lessons().length === 0) {
+            <div class="empty-lessons">
+              <p>Aucune leçon ajoutée</p>
+              <p class="help-text">Ajoutez des leçons avec des vidéos YouTube pour structurer votre cours</p>
+            </div>
+          } @else {
+            <div class="lessons-list">
+              @for (lesson of lessons(); track lesson.id; let i = $index) {
+                <div class="lesson-item">
+                  <div class="lesson-header">
+                    <div class="lesson-number">{{ i + 1 }}</div>
+                    <div class="lesson-info">
+                      <h3>{{ lesson.title }}</h3>
+                      @if (lesson.description) {
+                        <p class="lesson-description-preview">{{ getDescriptionPreview(lesson.description) }}</p>
+                      }
+                      <div class="lesson-meta">
+                        <span class="video-badge">🎥 Vidéo</span>
+                        @if (lesson.duration) {
+                          <span class="duration-badge">⏱️ {{ lesson.duration }} min</span>
+                        }
+                        @if (getLessonQuiz(lesson.id)) {
+                          <span class="quiz-badge">✅ Quiz</span>
+                        } @else {
+                          <span class="quiz-badge missing">❌ Pas de quiz</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <div class="lesson-actions">
+                    <button type="button" class="quiz-lesson-btn" (click)="openQuizModal(lesson.id)">
+                      📝 Quiz
+                    </button>
+                    <button type="button" class="edit-lesson-btn" (click)="openLessonForm(lesson)">
+                      ✏️ Modifier
+                    </button>
+                    <button type="button" class="delete-lesson-btn" (click)="deleteLesson(lesson.id)">
+                      🗑️ Supprimer
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Modal de gestion du quiz -->
+        @if (showQuizModal()) {
+          <div class="quiz-modal-overlay" (click)="closeQuizModal()">
+            <div class="quiz-modal" (click)="$event.stopPropagation()">
+              <div class="quiz-modal-header">
+                <h3>Gérer le quiz de la leçon</h3>
+                <button type="button" class="close-btn" (click)="closeQuizModal()">✕</button>
+              </div>
+              
+              <div class="quiz-modal-content">
+                @if (getLessonQuiz(currentLessonId()!)) {
+                  <div class="current-quiz-info">
+                    <h4>Quiz actuel :</h4>
+                    <div class="quiz-card">
+                      <strong>{{ getLessonQuiz(currentLessonId()!)!.title }}</strong>
+                      @if (getLessonQuiz(currentLessonId()!)!.description) {
+                        <p>{{ getLessonQuiz(currentLessonId()!)!.description }}</p>
+                      }
+                      <p class="quiz-meta">
+                        📝 {{ (getLessonQuiz(currentLessonId()!)!.questions || []).length }} questions
+                        | 🎯 Score min: {{ getLessonQuiz(currentLessonId()!)!.passingScore }}%
+                      </p>
+                    </div>
+                    <button type="button" class="remove-quiz-btn" (click)="removeQuizFromLesson()">
+                      Retirer le quiz
+                    </button>
+                  </div>
+                } @else {
+                  <div class="no-quiz-message">
+                    <p>Aucun quiz associé à cette leçon.</p>
+                  </div>
+                }
+
+                <div class="quiz-options">
+                  <h4>Options :</h4>
+                  
+                  <div class="option-section">
+                    <h5>1. Choisir un quiz existant</h5>
+                    @if (isLoadingQuizzes()) {
+                      <p>Chargement des quizzes...</p>
+                    } @else if (availableQuizzes().length === 0) {
+                      <p class="no-quizzes">Aucun quiz disponible. Créez-en un nouveau.</p>
+                    } @else {
+                      <div class="quizzes-list">
+                        @for (quiz of availableQuizzes(); track quiz.id) {
+                          <div class="quiz-item" [class.selected]="getLessonQuiz(currentLessonId()!)?.id === quiz.id">
+                            <div class="quiz-item-info">
+                              <strong>{{ quiz.title }}</strong>
+                              @if (quiz.description) {
+                                <p>{{ quiz.description }}</p>
+                              }
+                              <span class="quiz-item-meta">
+                                {{ (quiz.questions || []).length }} questions
+                              </span>
+                            </div>
+                            @if (getLessonQuiz(currentLessonId()!)?.id !== quiz.id) {
+                              <button 
+                                type="button" 
+                                class="assign-quiz-btn"
+                                (click)="assignExistingQuiz(quiz.id)">
+                                Sélectionner
+                              </button>
+                            } @else {
+                              <span class="assigned-badge">✓ Associé</span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <div class="option-section">
+                    <h5>2. Créer un nouveau quiz</h5>
+                    <button type="button" class="create-quiz-btn" (click)="createNewQuizForLesson()">
+                      ➕ Créer un nouveau quiz
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="quiz-modal-footer">
+                <button type="button" class="cancel-btn" (click)="closeQuizModal()">
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Formulaire d'ajout/modification de leçon -->
+        @if (showLessonForm()) {
+          <div class="lesson-form-modal">
+            <div class="lesson-form-card">
+              <div class="lesson-form-header">
+                <h3>{{ editingLessonId() ? 'Modifier la leçon' : 'Nouvelle leçon' }}</h3>
+                <button type="button" class="close-btn" (click)="closeLessonForm()">✕</button>
+              </div>
+              <form [formGroup]="lessonForm" (ngSubmit)="saveLesson()" class="lesson-form">
+                <div class="form-group">
+                  <label for="lesson-title">Titre de la leçon *</label>
+                  <input 
+                    id="lesson-title" 
+                    type="text" 
+                    formControlName="title"
+                    placeholder="Ex: Introduction à Flutter"
+                  />
+                  @if (lessonForm.get('title')?.invalid && lessonForm.get('title')?.touched) {
+                    <span class="error">Titre requis (min. 3 caractères)</span>
+                  }
+                </div>
+
+                <div class="form-group">
+                  <label for="lesson-description">Description (optionnel)</label>
+                  <textarea 
+                    id="lesson-description" 
+                    formControlName="description"
+                    rows="3"
+                    placeholder="Description de la leçon..."
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label>Source de la vidéo (optionnel)</label>
+                  <div class="video-source-selector">
+                    <button
+                      type="button"
+                      class="source-btn"
+                      [class.active]="videoSourceType() === 'none'"
+                      (click)="onVideoSourceTypeChange('none')"
+                    >
+                      Aucune vidéo
+                    </button>
+                    <button
+                      type="button"
+                      class="source-btn"
+                      [class.active]="videoSourceType() === 'youtube'"
+                      (click)="onVideoSourceTypeChange('youtube')"
+                    >
+                      YouTube
+                    </button>
+                    <button
+                      type="button"
+                      class="source-btn"
+                      [class.active]="videoSourceType() === 'upload'"
+                      (click)="onVideoSourceTypeChange('upload')"
+                    >
+                      Upload depuis l'appareil
+                    </button>
+                  </div>
+
+                  @if (videoSourceType() === 'youtube') {
+                    <div class="video-input-group">
+                      <label for="lesson-video">URL de la vidéo YouTube (optionnel)</label>
+                      <input 
+                        id="lesson-video" 
+                        type="text" 
+                        formControlName="videoUrl"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                      />
+                      <p class="help-text">
+                        Collez l'URL complète de la vidéo YouTube (ex: https://www.youtube.com/watch?v=...)
+                      </p>
+                    </div>
+                  } @else if (videoSourceType() === 'upload') {
+                    <div class="video-input-group">
+                      <label for="lesson-video-file">Fichier vidéo (optionnel)</label>
+                      <input 
+                        id="lesson-video-file" 
+                        type="file" 
+                        accept="video/*"
+                        (change)="onVideoFileSelected($event)"
+                      />
+                      @if (selectedVideoFile) {
+                        <p class="file-info">
+                          Fichier sélectionné: {{ selectedVideoFile.name }} 
+                          ({{ (selectedVideoFile.size / 1024 / 1024).toFixed(2) }} MB)
+                        </p>
+                      }
+                      <p class="help-text">
+                        Formats acceptés: MP4, WebM, OGG, MOV, AVI, MKV (max recommandé: 500 MB)
+                      </p>
+                    </div>
+                  } @else {
+                    <div class="video-input-group">
+                      <p class="help-text">
+                        Cette leçon contiendra uniquement du texte, du code et des tableaux dans la description.
+                      </p>
+                    </div>
+                  }
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="lesson-duration">Durée (minutes)</label>
+                    <input 
+                      id="lesson-duration" 
+                      type="number" 
+                      formControlName="duration"
+                      min="0"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="lesson-order">Ordre</label>
+                    <input 
+                      id="lesson-order" 
+                      type="number" 
+                      formControlName="orderIndex"
+                      min="1"
+                      placeholder="1"
+                    />
+                  </div>
+                </div>
+
+                <div class="lesson-form-actions">
+                  <button type="button" class="cancel-lesson-btn" (click)="closeLessonForm()">
+                    Annuler
+                  </button>
+                  <button type="submit" class="save-lesson-btn" [disabled]="lessonForm.get('title')?.invalid || isUploadingVideo()">
+                    @if (isUploadingVideo()) {
+                      <span>Upload en cours...</span>
+                    } @else {
+                      <span>{{ editingLessonId() ? 'Enregistrer' : 'Ajouter' }}</span>
+                    }
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        }
+
+        <div class="form-actions">
+          <button type="button" class="cancel-btn" routerLink="/teacher/courses" [disabled]="isSubmitting()">
+            Annuler
+          </button>
+          <button type="submit" class="submit-btn" [disabled]="courseForm.invalid || isSubmitting()">
+            @if (isSubmitting()) {
+              <span>Enregistrement...</span>
+            } @else {
+              <span>Enregistrer les modifications</span>
+            }
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>
+

@@ -1,0 +1,120 @@
+<div class="quiz-container">
+  @if (isLoading()) {
+    <div class="loading">Chargement du quiz...</div>
+  } @else if (errorMessage() && !quiz()) {
+    <div class="error-message">
+      <p>{{ errorMessage() }}</p>
+      <button class="btn-primary" (click)="goBackToQuizzes()">Retour aux quizzes</button>
+    </div>
+  } @else if (showResult() && quizResult()) {
+    <!-- Résultat du quiz -->
+    <div class="result-container">
+      <div class="result-header">
+        <h1>Résultat du quiz</h1>
+        <h2>{{ quiz()!.title }}</h2>
+      </div>
+
+      <div class="result-stats">
+        <div class="result-card score">
+          <div class="result-icon">🎯</div>
+          <div class="result-value">{{ quizResult()!.score }}%</div>
+          <div class="result-label">Score</div>
+        </div>
+        <div class="result-card">
+          <div class="result-icon">✅</div>
+          <div class="result-value">{{ getCorrectAnswersCount() }}/{{ getTotalQuestions() }}</div>
+          <div class="result-label">Réponses correctes</div>
+        </div>
+        <div class="result-card">
+          <div class="result-icon">🔄</div>
+          <div class="result-value">{{ quizResult()!.remainingAttempts }}</div>
+          <div class="result-label">Tentatives restantes</div>
+        </div>
+      </div>
+
+      @if (quizResult()!.passed) {
+        <div class="success-message">
+          <span class="success-icon">🎉</span>
+          <h3>Félicitations ! Vous avez réussi le quiz !</h3>
+        </div>
+      } @else {
+        <div class="fail-message">
+          <span class="fail-icon">😔</span>
+          <h3>Vous n'avez pas atteint le score minimum requis.</h3>
+          <p>Score minimum : {{ quiz()!.passingScore }}%</p>
+        </div>
+      }
+
+      <div class="result-actions">
+        <button class="btn-secondary" (click)="retakeQuiz()">Refaire le quiz</button>
+        <button class="btn-primary" (click)="goBackToQuizzes()">Retour aux quizzes</button>
+      </div>
+    </div>
+  } @else if (quiz()) {
+    <div class="quiz-header">
+      <h1>{{ quiz()!.title }}</h1>
+      <p class="description">{{ quiz()!.description }}</p>
+      <div class="quiz-info">
+        <span>{{ getTotalQuestions() }} questions</span>
+        <span>•</span>
+        <span>Score minimum : {{ quiz()!.passingScore }}%</span>
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="error-alert">
+        <span class="error-icon">⚠️</span>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <div class="progress-indicator">
+      <span>Questions répondues : {{ getAnsweredCount() }}/{{ getTotalQuestions() }}</span>
+      @if (getAnsweredCount() < getTotalQuestions()) {
+        <span class="warning">⚠️ {{ getTotalQuestions() - getAnsweredCount() }} question(s) non répondue(s)</span>
+      }
+    </div>
+
+    <div class="questions-section">
+      @for (question of quiz()!.questions; track question.id; let i = $index) {
+        <div class="question-card" [class.answered]="isAnswerSelected(question.id, question.options[0]) || isAnswerSelected(question.id, question.options[1]) || isAnswerSelected(question.id, question.options[2]) || isAnswerSelected(question.id, question.options[3])">
+          <h3 class="question-number">Question {{ i + 1 }}</h3>
+          <p class="question-text">{{ question.text }}</p>
+          <div class="options">
+            @for (option of question.options; track option) {
+              <label class="option-label" [class.selected]="isAnswerSelected(question.id, option)">
+                <input
+                  type="radio"
+                  [name]="'question-' + question.id"
+                  [value]="option"
+                  (change)="selectAnswer(question.id, option)"
+                />
+                <span>{{ option }}</span>
+              </label>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="quiz-footer">
+      <button
+        class="submit-btn"
+        (click)="submitQuiz()"
+        [disabled]="isSubmitting() || getAnsweredCount() === 0"
+      >
+        @if (isSubmitting()) {
+          <span class="spinner">⏳</span> Soumission en cours...
+        } @else {
+          Soumettre le quiz
+        }
+      </button>
+      @if (getAnsweredCount() < getTotalQuestions() && getAnsweredCount() > 0) {
+        <p class="submit-note">Vous pouvez soumettre même si toutes les questions ne sont pas répondues.</p>
+      }
+    </div>
+  }
+</div>
+
+
+
