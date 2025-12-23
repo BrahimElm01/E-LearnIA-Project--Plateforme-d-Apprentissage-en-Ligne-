@@ -481,15 +481,6 @@ Voir `elearnia-backend/diagrammes/README_PLANTUML.md` pour plus de détails.
 
 ---
 
-## 🤝 Contribution
-
-Les contributions sont les bienvenues ! Pour contribuer :
-
-1. **Fork** le projet
-2. Créer une **branche** pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`)
-3. **Commit** vos changements (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une **Pull Request**
 
 ### Guidelines
 
